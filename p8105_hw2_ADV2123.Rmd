@@ -176,3 +176,18 @@ gwynnda_butts_june22 =
 The combined dataset contains `r nrow(trash_wheel_df)` observations and `r ncol(trash_wheel_df)` variables. The data were collected from `r min(pull(trash_wheel_df, year))` to `r max(pull(trash_wheel_df, year))`, and each observation represents a dumpster filled by one of three trash wheels: Mr. Trash Wheel (`r nrow(Mr_Wheel_df)` dumpsters), Professor Trash Wheel (`r nrow(Prof_Wheel_df)` dumpsters), and Gwynnda (`r nrow(Gwynnda_df)` dumpsters). Some key variables include the trash wheel that collected the dumpster (`trash_wheel`), the dumpster number and the date of collection, the weight (in tons) and volume (in cubic yards) of trash collected, as well as the count of specific items, such as plastic bottles, polystyrene, cigarette butts, plastic bags, sports balls, and wrappers. Some variables are not recorded for every wheel. For example, sports balls are only available for Mr. Trash Wheel.
 
 For available data, Professor Trash Wheel collected a total of `r prof_total_weight` tons of trash. Gwynnda collected `r format(gwynnda_butts_june22, big.mark = ",")` cigarette butts in June of 2022.
+
+# Problem 3
+
+```{r}
+baseline_df = 
+  read_csv("data/MCI_baseline.csv", skip = 1, na = c("NA", "", ".")) |> 
+  janitor::clean_names() |> 
+  mutate(
+    sex = recode_values(sex, 1 ~ "male", 0 ~ "female"),
+    apoe4 = recode_values(apoe4, 1 ~ "carrier", 0 ~ "non_carrier")) |>
+  filter(is.na(age_at_onset) | age_at_onset > current_age)
+
+baseline_df
+```
+
