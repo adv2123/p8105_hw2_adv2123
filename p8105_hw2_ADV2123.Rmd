@@ -1,0 +1,34 @@
+---
+title: "Homework 2"
+author: "Andrea Vasquez"
+date: " 10/04/2026"
+output: 
+  github_document:
+    toc: true
+---
+
+# Problem 1
+
+### 1.1 Create a data frame
+
+```{r}
+
+library(tidyverse)
+
+NYC_transit_df = 
+  read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+  na = c("NA", "", "."),
+    col_types = cols(
+      Route8 = col_character(),
+      Route9 = col_character(),
+      Route10 = col_character(),
+      Route11 = col_character())) |> 
+  janitor::clean_names() |> 
+  select(line, station_name, station_latitude, station_longitude,
+         starts_with("route"), entry, vending, entrance_type, ada) |> 
+  mutate(entry = case_match(entry, "YES" ~ TRUE, "NO" ~ FALSE))
+
+NYC_transit_df
+
+```
+
