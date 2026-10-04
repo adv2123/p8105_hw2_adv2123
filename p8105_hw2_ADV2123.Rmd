@@ -109,7 +109,7 @@ There are `r n_serving_A` stations serving the A train, of which `r n_A_complian
 
 # Problem 2
 
-### Data import and cleaning
+### 2.1 Data import and cleaning
 
 ```{r}
 
@@ -156,6 +156,23 @@ trash_wheel_df =
 trash_wheel_df
 ```
 
+### 2.2 Data set description + Questions
 
 
+```{r}
+prof_total_weight = 
+  trash_wheel_df |> 
+  filter(trash_wheel == "Professor_Trash") |> 
+  pull(weight_tons) |> 
+  sum(na.rm = TRUE)
 
+gwynnda_butts_june22 = 
+  trash_wheel_df |> 
+  filter(trash_wheel == "Gwynnda", month == "June", year == 2022) |> 
+  pull(cigarette_butts) |> 
+  sum(na.rm = TRUE)
+```
+
+The combined dataset contains `r nrow(trash_wheel_df)` observations and `r ncol(trash_wheel_df)` variables. The data were collected from `r min(pull(trash_wheel_df, year))` to `r max(pull(trash_wheel_df, year))`, and each observation represents a dumpster filled by one of three trash wheels: Mr. Trash Wheel (`r nrow(Mr_Wheel_df)` dumpsters), Professor Trash Wheel (`r nrow(Prof_Wheel_df)` dumpsters), and Gwynnda (`r nrow(Gwynnda_df)` dumpsters). Some key variables include the trash wheel that collected the dumpster (`trash_wheel`), the dumpster number and the date of collection, the weight (in tons) and volume (in cubic yards) of trash collected, as well as the count of specific items, such as plastic bottles, polystyrene, cigarette butts, plastic bags, sports balls, and wrappers. Some variables are not recorded for every wheel. For example, sports balls are only available for Mr. Trash Wheel.
+
+For available data, Professor Trash Wheel collected a total of `r prof_total_weight` tons of trash. Gwynnda collected `r format(gwynnda_butts_june22, big.mark = ",")` cigarette butts in June of 2022.
