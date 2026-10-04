@@ -179,6 +179,7 @@ For available data, Professor Trash Wheel collected a total of `r prof_total_wei
 
 # Problem 3
 
+### 3.1 Data import + clean + questions
 ```{r}
 baseline_df = 
   read_csv("data/MCI_baseline.csv", skip = 1, na = c("NA", "", ".")) |> 
