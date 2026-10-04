@@ -107,6 +107,55 @@ n_A_compliant =
 
 There are `r n_serving_A` stations serving the A train, of which `r n_A_compliant` are compliant with ADA. 
 
+# Problem 2
+
+### Data import and cleaning
+
+```{r}
+
+Mr_Wheel_df = 
+  readxl::read_excel(
+    "data/202509 Trash Wheel Collection Data.xlsx",
+    sheet = "Mr. Trash Wheel",
+    range = "A2:N709") |> 
+  janitor::clean_names() |> 
+  drop_na(dumpster) |> 
+  mutate(
+    sports_balls = as.integer(round(sports_balls)),
+    year = as.integer(year), 
+    trash_wheel = "Mr_Trash") |> 
+  relocate(trash_wheel)
+
+Prof_Wheel_df = 
+  readxl::read_excel(
+    "data/202509 Trash Wheel Collection Data.xlsx",
+    sheet = "Professor Trash Wheel",
+    range = "A2:M134") |> 
+  janitor::clean_names() |> 
+  drop_na(dumpster) |> 
+  mutate(
+    year = as.integer(year), 
+    trash_wheel = "Professor_Trash") |> 
+  relocate(trash_wheel)
+
+Gwynnda_df = 
+  readxl::read_excel(
+    "data/202509 Trash Wheel Collection Data.xlsx",
+    sheet = "Gwynns Falls Trash Wheel",
+    range = "A2:L351") |> 
+  janitor::clean_names() |> 
+  drop_na(dumpster) |> 
+  mutate(
+    year = as.integer(year), 
+    trash_wheel = "Gwynnda") |> 
+  relocate(trash_wheel)
+
+trash_wheel_df = 
+  bind_rows(Mr_Wheel_df, Prof_Wheel_df, Gwynnda_df)
+
+trash_wheel_df
+```
+
 
 
 
