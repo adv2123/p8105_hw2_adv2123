@@ -22,8 +22,8 @@ NYC_transit_df =
       Route8 = col_character(),
       Route9 = col_character(),
       Route10 = col_character(),
-      Route11 = col_character())) |> 
-  janitor::clean_names() |> 
+      Route11 = col_character()))|> 
+  janitor::clean_names()|> 
   select(line, station_name, station_latitude, station_longitude,
          starts_with("route"), entry, vending, entrance_type, ada) |> 
   mutate(entry = case_match(entry, "YES" ~ TRUE, "NO" ~ FALSE))
@@ -41,8 +41,8 @@ The NYC transit dataset contains information on each subway entrance and exit. A
 
 ```{r}
 n_stations = 
-  NYC_transit_df |>
-  distinct(line, station_name) |>
+  NYC_transit_df|>
+  distinct(line, station_name)|>
   nrow()
 ```
 
@@ -52,27 +52,61 @@ There are `r n_stations` distinct stations.
 
 ```{r}
 n_ada_compliant =
-  NYC_transit_df |>
-  filter (ada == TRUE)|>
-  distinct (line, station_name) |>
+  NYC_transit_df|>
+  filter(ada == TRUE)|>
+  distinct(line, station_name)|>
   nrow()
 ```
 
-In total, `r n_ada_compliant` stations are complaint with ADA. 
+In total, `r n_ada_compliant` stations are compliant with ADA. 
 
 #### Q3
 
 ```{r}
 prop_entry_ven = 
-  NYC_transit_df |>
-  filter(vending == "NO") |>
-  pull (entry) |>
+  NYC_transit_df|>
+  filter(vending == "NO")|>
+  pull (entry)|>
   mean()
 ```
 
 Among entrances/exits without vending, `r round(prop_entry_ven * 100, 2)`% allow entrance. 
 
-### 1.3 Reformat data
+### 1.3 Reformat data 
+
+```{r echo=TRUE}
+
+NYC_transit_tidy = 
+  NYC_transit_df |> 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name")|> 
+  drop_na(route_name)
+
+NYC_transit_tidy
+```
+
+### 1.4 Questions about train A
+
+```{r}
+
+n_serving_A = 
+  NYC_transit_tidy|>
+  filter(route_name == "A")|>
+  distinct(line, station_name)|>
+  nrow()
+
+n_A_compliant = 
+  NYC_transit_tidy|>
+  filter(route_name == "A", ada == TRUE)|>
+  distinct(line, station_name)|>
+  nrow()
+```
+
+There are `r n_serving_A` stations serving the A train, of which `r n_A_compliant` are compliant with ADA. 
+
 
 
 
