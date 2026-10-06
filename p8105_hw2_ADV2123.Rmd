@@ -11,9 +11,12 @@ output:
 
 ### 1.1 Data import and cleaning + brief description 
 
-```{r}
-
+```{r include=FALSE}
 library(tidyverse)
+```
+
+
+```{r}
 
 NYC_transit_df = 
   read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
@@ -115,9 +118,10 @@ There are `r n_serving_A` stations serving the A train, of which `r n_A_complian
 
 Mr_Wheel_df = 
   readxl::read_excel(
-    "data/202509 Trash Wheel Collection Data.xlsx",
+    "data/202610 Trash Wheel Collection Data.xlsx",
     sheet = "Mr. Trash Wheel",
-    range = "A2:N709") |> 
+    range = "A2:N742",
+    na = c("NA", "", "."))|> 
   janitor::clean_names() |> 
   drop_na(dumpster) |> 
   mutate(
@@ -128,9 +132,10 @@ Mr_Wheel_df =
 
 Prof_Wheel_df = 
   readxl::read_excel(
-    "data/202509 Trash Wheel Collection Data.xlsx",
+    "data/202610 Trash Wheel Collection Data.xlsx",
     sheet = "Professor Trash Wheel",
-    range = "A2:M134") |> 
+    range = "A2:M139",
+    na = c("NA", "", ".", "dive"))|> 
   janitor::clean_names() |> 
   drop_na(dumpster) |> 
   mutate(
@@ -140,9 +145,10 @@ Prof_Wheel_df =
 
 Gwynnda_df = 
   readxl::read_excel(
-    "data/202509 Trash Wheel Collection Data.xlsx",
-    sheet = "Gwynns Falls Trash Wheel",
-    range = "A2:L351") |> 
+    "data/202610 Trash Wheel Collection Data.xlsx",
+    sheet = "Gwynnda the Good Wheel of the W",
+    range = "A2:L394",
+    na = c("NA", "", "."))|> 
   janitor::clean_names() |> 
   drop_na(dumpster) |> 
   mutate(
@@ -156,8 +162,14 @@ trash_wheel_df =
 trash_wheel_df
 ```
 
-### 2.2 Data set description + Questions
+### 2.2 Data set description
 
+The combined dataset contains `r nrow(trash_wheel_df)` observations and `r ncol(trash_wheel_df)` variables. The data were collected from `r min(pull(trash_wheel_df, year))` to `r max(pull(trash_wheel_df, year))`, and each observation represents a dumpster filled by one of three trash wheels: Mr. Trash Wheel (`r nrow(Mr_Wheel_df)` dumpsters), Professor Trash Wheel (`r nrow(Prof_Wheel_df)` dumpsters), and Gwynnda (`r nrow(Gwynnda_df)` dumpsters). Some key variables include the trash wheel that collected the dumpster (`trash_wheel`), the dumpster number and the date of collection, the weight (in tons) and volume (in cubic yards) of trash collected, as well as the count of specific items, such as plastic bottles, polystyrene, cigarette butts, plastic bags, sports balls, and wrappers. Some variables are not recorded for every wheel. For example, sports balls are only available for Mr. Trash Wheel. 
+
+It is important to note that given some quality issues present in the raw data, the combined data may not look exactly the same. For instance, the Gwynnda sheet skips the dumpster numbers 373 to 379 and dumpster 21 appears twice, resulting in a total number of dumpster (`r nrow(Gwynnda_df)`) different from the highest recorded number (`r max(pull(Gwynnda_df, dumpster))`). In the Professor Trash Wheel sheet, one entry had the text "dive" in place of a plastic bottle count and so was treated as a missing value.
+
+
+### 2.3 Answer to Questions: 
 
 ```{r}
 prof_total_weight = 
@@ -172,8 +184,6 @@ gwynnda_butts_june22 =
   pull(cigarette_butts) |> 
   sum(na.rm = TRUE)
 ```
-
-The combined dataset contains `r nrow(trash_wheel_df)` observations and `r ncol(trash_wheel_df)` variables. The data were collected from `r min(pull(trash_wheel_df, year))` to `r max(pull(trash_wheel_df, year))`, and each observation represents a dumpster filled by one of three trash wheels: Mr. Trash Wheel (`r nrow(Mr_Wheel_df)` dumpsters), Professor Trash Wheel (`r nrow(Prof_Wheel_df)` dumpsters), and Gwynnda (`r nrow(Gwynnda_df)` dumpsters). Some key variables include the trash wheel that collected the dumpster (`trash_wheel`), the dumpster number and the date of collection, the weight (in tons) and volume (in cubic yards) of trash collected, as well as the count of specific items, such as plastic bottles, polystyrene, cigarette butts, plastic bags, sports balls, and wrappers. Some variables are not recorded for every wheel. For example, sports balls are only available for Mr. Trash Wheel.
 
 For available data, Professor Trash Wheel collected a total of `r prof_total_weight` tons of trash. Gwynnda collected `r format(gwynnda_butts_june22, big.mark = ",")` cigarette butts in June of 2022.
 
@@ -208,7 +218,7 @@ prop_women_carriers =
   mean()
 ```
 
-Some of the crucial steps to import and clean this data was to indicate the rows and columns to be included (skipping the frist row that did not provided data entry) and specify that missing values should have NA as their entry. The variables sex and apoe4 needed to be recoded to avoid confusion with the meaning of 1 and 0. For this, two new variables where created (sex and apoe4) with the correct coding. Finally, the data was filtered to remove entries that did not meet the inclusion criteria. In other words, patients that had their MCI onset before the study began (their current age). 
+Some of the crucial steps to import and clean this data was to indicate the rows and columns to be included (skipping the frist row that did not provided data entry) and specify that missing values should have NA as their entry. The variables sex and apoe4 needed to be recoded to avoid confusion with the meaning of 1 and 0. For this, two new variables where created (sex and apoe4) with the correct coding. Finally, the data was filtered to remove entries that did not meet the inclusion criteria. In other words, patients that had their MCI onset before the study began (age at onset < current age). 
 
-In total, `r n_recruited` participants where recruited, of which `r n_developed_mci` developed MCI during follow-up.Among women in the study, `r round(prop_women_carriers * 100, 2)`% are APOE4 carriers.
+In total, `r n_recruited` participants where recruited, of which `r n_developed_mci` developed MCI during follow-up. Among women in the study, `r round(prop_women_carriers * 100, 2)`% are APOE4 carriers.
 
