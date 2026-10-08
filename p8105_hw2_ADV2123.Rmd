@@ -201,10 +201,6 @@ baseline_df =
 
 baseline_df
 
-n_recruited = 
-  read_csv("data/MCI_baseline.csv", skip = 1, na = c("NA", "", ".")) |> 
-  nrow()
-
 n_developed_mci = 
   baseline_df |> 
   filter(!is.na(age_at_onset)) |> 
@@ -220,7 +216,7 @@ prop_women_carriers =
 
 Some of the crucial steps to import and clean this data was to indicate the rows and columns to be included (skipping the frist row that did not provided data entry) and specify that missing values should have NA as their entry. The variables sex and apoe4 needed to be recoded to avoid confusion with the meaning of 1 and 0. For this, two new variables where created (sex and apoe4) with the correct coding. Finally, the data was filtered to remove entries that did not meet the inclusion criteria. In other words, patients that had their MCI onset before the study began (age at onset < current age). 
 
-In total, `r n_recruited` participants where recruited, of which `r n_developed_mci` developed MCI during follow-up. Among women in the study, `r round(prop_women_carriers * 100, 2)`% are APOE4 carriers.
+In total, `r nrow(baseline_df)` participants where recruited, of which `r n_developed_mci` developed MCI during follow-up. Among women in the study, `r round(prop_women_carriers * 100, 2)`% are APOE4 carriers.
 
 ### 3.2 Data import and clean of amyloid data set
 
