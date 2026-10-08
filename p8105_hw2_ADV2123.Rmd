@@ -29,51 +29,22 @@ NYC_transit_df =
   janitor::clean_names()|> 
   select(line, station_name, station_latitude, station_longitude,
          starts_with("route"), entry, vending, entrance_type, ada) |> 
-  mutate(entry = case_match(entry, "YES" ~ TRUE, "NO" ~ FALSE))
+  mutate(entry = recode_values(entry, "YES" ~ TRUE, "NO" ~ FALSE))
 
 NYC_transit_df
 
-skimr::skim(NYC_transit_df)
 ```
 
-The NYC transit dataset contains information on each subway entrance and exit. After cleaning, it has `r nrow(NYC_transit_df)`, rows and `r ncol(NYC_transit_df)` columns, of which 15 are character variables (line, station name, routes 1–11, vending, and entrance type), 2 are logical variables (entry and ADA compliance), and 2 are numeric variables (station latitude and longitude). To clean the datam, I imported the file specifying that blank cells be treated as missing and that routes 8-11 be read as character variables. These columns contain numbered trans and would otherwise be read as numeric, even though the values are rout name and not true numbers. I then cleaned the variables names, retained only the variables of interest, and converted the entry variable from character to logical. Given that route spread across 11 columns, we can conclude that this data is not tidy. To be tidy, there should be a single column for the variable route. 
+The NYC transit dataset contains information on each subway entrance and exit. After cleaning, it has `r nrow(NYC_transit_df)` rows and `r ncol(NYC_transit_df)` columns, of which 15 are character variables (line, station name, routes 1–11, vending, and entrance type), 2 are logical variables (entry and ADA compliance), and 2 are numeric variables (station latitude and longitude). To clean the data, I imported the file specifying that blank cells be treated as missing and that routes 8-11 be read as character variables. These columns contain numbered trans and would otherwise be read as numeric, even though the values are route name and not true numbers. I then cleaned the variables names, retained only the variables of interest, and converted the entry variable from character to logical. Given that route spread across 11 columns, we can conclude that this data is not tidy. To be tidy, there should be a single column for the variable route. 
 
 ### 1.2 Answering questions
 
-#### Q1
 
-```{r}
-n_stations = 
-  NYC_transit_df|>
-  distinct(line, station_name)|>
-  nrow()
-```
+- There are `r NYC_transit_df |> distinct(line, station_name) |> nrow()` distinct stations. 
 
-There are `r n_stations` distinct stations. 
+- In total, `r NYC_transit_df |> filter(ada == TRUE) |> distinct(line, station_name) |> nrow()` stations are ADA compliant.
 
-#### Q2
-
-```{r}
-n_ada_compliant =
-  NYC_transit_df|>
-  filter(ada == TRUE)|>
-  distinct(line, station_name)|>
-  nrow()
-```
-
-In total, `r n_ada_compliant` stations are compliant with ADA. 
-
-#### Q3
-
-```{r}
-prop_entry_ven = 
-  NYC_transit_df|>
-  filter(vending == "NO")|>
-  pull (entry)|>
-  mean()
-```
-
-Among entrances/exits without vending, `r round(prop_entry_ven * 100, 2)`% allow entrance. 
+- Among entrances/exits without vending, `r (NYC_transit_df |> filter(vending == "NO") |> pull(entry) |> mean() * 100) |> round(1)`% allow entrance.
 
 ### 1.3 Reformat data 
 
@@ -93,22 +64,7 @@ NYC_transit_tidy
 
 ### 1.4 Questions about train A
 
-```{r}
-
-n_serving_A = 
-  NYC_transit_tidy|>
-  filter(route_name == "A")|>
-  distinct(line, station_name)|>
-  nrow()
-
-n_A_compliant = 
-  NYC_transit_tidy|>
-  filter(route_name == "A", ada == TRUE)|>
-  distinct(line, station_name)|>
-  nrow()
-```
-
-There are `r n_serving_A` stations serving the A train, of which `r n_A_compliant` are compliant with ADA. 
+There are `r NYC_transit_tidy |> filter(route_name == "A") |> distinct(line, station_name) |> nrow()` stations serving the A train, of which `r NYC_transit_tidy |> filter(route_name == "A", ada == TRUE) |> distinct(line, station_name) |> nrow()` are ADA compliant.
 
 # Problem 2
 
@@ -171,21 +127,7 @@ It is important to note that given some quality issues present in the raw data, 
 
 ### 2.3 Answer to Questions: 
 
-```{r}
-prof_total_weight = 
-  trash_wheel_df |> 
-  filter(trash_wheel == "Professor_Trash") |> 
-  pull(weight_tons) |> 
-  sum(na.rm = TRUE)
-
-gwynnda_butts_june22 = 
-  trash_wheel_df |> 
-  filter(trash_wheel == "Gwynnda", month == "June", year == 2022) |> 
-  pull(cigarette_butts) |> 
-  sum(na.rm = TRUE)
-```
-
-For available data, Professor Trash Wheel collected a total of `r prof_total_weight` tons of trash. Gwynnda collected `r format(gwynnda_butts_june22, big.mark = ",")` cigarette butts in June of 2022.
+For available data, Professor Trash Wheel collected a total of `r trash_wheel_df |> filter(trash_wheel == "Professor_Trash") |> pull(weight_tons) |> sum(na.rm = TRUE)` tons of trash. Gwynnda collected `r trash_wheel_df |> filter(trash_wheel == "Gwynnda", month == "June", year == 2022) |> pull(cigarette_butts) |> sum(na.rm = TRUE) |> format(big.mark = ",")` cigarette butts in June of 2022.
 
 # Problem 3
 
@@ -201,22 +143,13 @@ baseline_df =
 
 baseline_df
 
-n_developed_mci = 
-  baseline_df |> 
-  filter(!is.na(age_at_onset)) |> 
-  nrow()
-
-prop_women_carriers = 
-  baseline_df |> 
-  filter(sex == "female") |> 
-  mutate(carrier = apoe4 == "carrier") |> 
-  pull(carrier) |> 
-  mean()
 ```
 
-Some of the crucial steps to import and clean this data was to indicate the rows and columns to be included (skipping the frist row that did not provided data entry) and specify that missing values should have NA as their entry. The variables sex and apoe4 needed to be recoded to avoid confusion with the meaning of 1 and 0. For this, two new variables where created (sex and apoe4) with the correct coding. Finally, the data was filtered to remove entries that did not meet the inclusion criteria. In other words, patients that had their MCI onset before the study began (age at onset < current age). 
+Some of the crucial steps to import and clean this data was to indicate the rows and columns to be included (skipping the first row that did not provided data entry) and specify that missing values should have NA as their entry. The variables sex and apoe4 needed to be recoded to avoid confusion with the meaning of 1 and 0. Finally, the data was filtered to remove entries that did not meet the inclusion criteria. In other words, patients who had their MCI onset before the study began (age at onset ≤ current age). 
 
-In total, `r nrow(baseline_df)` participants where recruited, of which `r n_developed_mci` developed MCI during follow-up. Among women in the study, `r round(prop_women_carriers * 100, 2)`% are APOE4 carriers.
+Overall, this dataset includes `r nrow(baseline_df)` participants and `r ncol(baseline_df)`variable (ID, baseline age, sex, years of education, APOE4 carrier status, and age at MCI onset, which is missing for those who never developed MCI).
+
+In total, `r nrow(baseline_df)` participants were recruited, of whom `r baseline_df |> drop_na(age_at_onset) |> nrow()` developed MCI during follow-up. The average baseline age was `r baseline_df |> pull(current_age) |> mean() |> round(1)` years. Among women in the study, `r round(100 * mean((baseline_df |> filter(sex == "female") |> pull(apoe4)) == "carrier"), 1)`% are APOE4 carriers.
 
 ### 3.2 Data import and clean of amyloid data set
 
@@ -234,7 +167,7 @@ amyloid_df =
 amyloid_df
 ```
 
-This dataset contains the amyloid 42/40 ratio measured for each participant at up to five visits: baseline and 2, 3, 6, and 8 years after baseline. A few steps were needed to clean the data. The first row of the dile is a description and not the variables names, so it was skipped during import. Several observations had "NA" or "Na" entered in places of a ratio, and these were treated as missing. The variable `Study_id` was renamed to `id` to match the baseline dataset. The data were not tidy, since there weas a separate column for each visit, so I reorganized them to a long format with one row per participant per visit. The resulting dataset has `r nrow(amyloid_df)` rows and `r ncol(amyloid_df)` variables (`id`,`visit`, and `amyloid_ratio`), covering `r amyloid_df |> distinct(id) |> nrow()` participants. 
+This dataset contains the amyloid 42/40 ratio measured for each participant at up to five visits: baseline and 2, 4, 6, and 8 years after baseline. A few steps were needed to clean the data. The first row of the file is a description and not the variables names, so it was skipped during import. Several observations had "NA" or "Na" entered in place of a ratio, and these were treated as missing. The variable `study_id` was renamed to `id` to match the baseline dataset. The data were not tidy, since there was a separate column for each visit, so I reorganized them to a long format with one row per participant per visit. The resulting dataset has `r nrow(amyloid_df)` rows and `r ncol(amyloid_df)` variables (`id`,`visit`, and `amyloid_ratio`), covering `r amyloid_df |> distinct(id) |> nrow()` participants. 
 
 ### 3.3 Checking whether participants appear in only one dataset
 ```{r}
@@ -246,12 +179,10 @@ amyloid_only_df =
   amyloid_df |> 
   filter(!(id %in% pull(baseline_df, id))) |> 
   distinct(id)
-
-nrow(baseline_only_df)
-nrow(amyloid_only_df)
 ```
 
-There are `r nrow(baseline_only_df)` participants that appear only on the baseline dataset and `r nrow(amyloid_only_df)` that appear only in the amyloid dataset. 
+There are `r nrow(baseline_only_df)` participants that appear only on the baseline dataset and `r nrow(amyloid_only_df)` that appear only in the amyloid dataset. This indicates that 8 participants have baseline information but no amyloid measurements, and the 16 have amyloid measurements but no baseline record. If these participants were kept when combining the data, they would have missing values for all of the variables from the other dataset, so only those who appear in both datasets should be included in the combined data.
+
 
 ### 3.4 Combining dataset
 
